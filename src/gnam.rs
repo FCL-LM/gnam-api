@@ -1,13 +1,11 @@
+use std::fs;
+
 use actix_multipart::form::{tempfile::TempFile, MultipartForm};
 use actix_web::{get, post, HttpResponse};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
-use std::{
-    error::Error,
-    fmt::format,
-    fs::{self, create_dir, remove_file},
-    path::Path,
-};
+
+use crate::constants::{TMP_PATH, DATA_PATH};
 pub const APPLICATION_JSON: &str = "application/json";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -29,7 +27,7 @@ pub async fn index() -> HttpResponse {
 
 #[derive(Debug, MultipartForm)]
 pub struct UploadForm {
-    #[multipart(rename = "file")]
+    #[multipart(rename = "file", limit = "1 GiB")]
     file: TempFile,
 }
 
@@ -56,30 +54,19 @@ fn status_ok() -> HttpResponse {
 // ingestion endpoint
 #[post("/gnam")]
 pub async fn gnam(MultipartForm(form): MultipartForm<UploadForm>) -> HttpResponse {
-    let data_path = String::from("./data");
-    let tmp_path = format!("{}/.tmp/", data_path);
+    let filename = form.file.file_name.unwrap();
+    let path = format!("{}/{}", TMP_PATH, filename.clone());
+    info!("ingesting {filename}");
 
-    if !Path::new(&tmp_path).exists() {
-        let e = create_dir(tmp_path.clone());
-        assert!(e.is_ok());
-    }
-
-    let f = form.file;
-    let filename = f.file_name.unwrap();
-    let path = format!("{}{}", tmp_path, filename);
-    let tmp_pathfile = f.file.path();
-
-    info!("Saving the file {}", path);
-
-    let err = fs::copy(tmp_pathfile, path.clone());
-    let _ = remove_file(tmp_path);
+    let err = form.file.file.persist(path.clone());
 
     if err.is_err() {
         error!("{}", err.err().unwrap());
         return internal_error();
     }
 
-    let data_pathfile = format!("{}/{}", data_path, filename);
+    let data_pathfile = format!("{}/{}", DATA_PATH, filename);
+    info!("moving {filename} to data directory...");
     let err = fs::rename(path, data_pathfile);
 
     if err.is_err() {
