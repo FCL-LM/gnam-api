@@ -1,21 +1,26 @@
 use std::{env, io};
+use actix_web::{App, HttpServer, middleware::Logger};
+use log::info;
 
-use actix_web::middleware;
-use actix_web::{App, HttpServer};
 
 mod gnam;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
+    std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
+    info!("Running");
+
     HttpServer::new(|| {
+        let logger = Logger::default();
+        
         App::new()
-            // enable logger - always register actix-web Logger middleware last
-            .wrap(middleware::Logger::default())
+            // enable logger
+            .wrap(logger)
             // register HTTP requests handlers
             .service(gnam::index)
+            .service(gnam::gnam)
     })
     .bind("0.0.0.0:9090")?
     .run()
