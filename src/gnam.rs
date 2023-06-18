@@ -6,7 +6,7 @@ use log::{error, info};
 use serde::{Deserialize, Serialize};
 
 use crate::constants::{TMP_PATH, DATA_PATH};
-pub const APPLICATION_JSON: &str = "application/json";
+const APPLICATION_JSON: &str = "application/json";
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Response {

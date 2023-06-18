@@ -9,6 +9,10 @@ services:
     container_name: gnam-api
     ports:
         - "9090:9090"
+    environment:
+        - S3_ENDPOINT: http://127.0.0.1:8333
+        - AWS_ACCESS_KEY_ID: adminadmin
+        - AWS_SECRET_ACCESS_KEY: adminadmin
     volumes:
         - <source_document>:/data
 ```
