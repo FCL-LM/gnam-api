@@ -22,7 +22,7 @@ async fn main() -> io::Result<()> {
 
         App::new()
             .wrap(logger)
-            .app_data(TempFileConfig::default().directory("/data/.tmp"))
+            .app_data(TempFileConfig::default().directory("/data/"))
             .app_data(
                 MultipartFormConfig::default()
                     .total_limit(MAX_FILE_SIZE)

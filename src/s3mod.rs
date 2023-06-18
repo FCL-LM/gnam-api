@@ -17,6 +17,7 @@ pub async fn get_client() -> Client {
 
     let config = s3::config::Builder::from(&temp_config).endpoint_url(endpoint);
     let client = s3::Client::from_conf(config.build());
+
     return client;
 }
 
@@ -42,7 +43,7 @@ pub async fn bucket_exists(client: &Client, bucket_name: &str) -> bool {
 
     if resp.is_err() {
         error!(
-            "Error while checking if the bucket {} exists: {}",
+            "Checking if the bucket {} exists: {}",
             bucket_name,
             resp.err().unwrap()
         );

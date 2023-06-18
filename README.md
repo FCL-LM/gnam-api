@@ -3,18 +3,19 @@
 ## Running with docker-compose
 
 ```yaml
-version: 2
+version: "2"
 services:
-    image: ghcr.io/fcl-lm/gnam-api:main
-    container_name: gnam-api
-    ports:
-        - "9090:9090"
-    environment:
-        - S3_ENDPOINT: http://127.0.0.1:8333
-        - AWS_ACCESS_KEY_ID: adminadmin
-        - AWS_SECRET_ACCESS_KEY: adminadmin
-    volumes:
-        - <source_document>:/data
+    gnam-api:
+        image: ghcr.io/fcl-lm/gnam-api:main
+        container_name: gnam-api
+        ports:
+            - "9090:9090"
+        environment:
+            S3_ENDPOINT: http://127.0.0.1:8333
+            AWS_ACCESS_KEY_ID: adminadmin
+            AWS_SECRET_ACCESS_KEY: adminadmin
+        volumes:
+            - <source_document>:/data
 ```
 
 ## API

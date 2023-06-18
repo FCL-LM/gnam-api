@@ -1,11 +1,12 @@
-use std::fs;
+use std::{fs, path::Path};
 
 use actix_multipart::form::{tempfile::TempFile, MultipartForm};
 use actix_web::{get, post, HttpResponse};
+use aws_sdk_s3::primitives::ByteStream;
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::constants::{TMP_PATH, DATA_PATH};
+use crate::{constants::TMP_PATH, s3mod::get_client};
 const APPLICATION_JSON: &str = "application/json";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -56,7 +57,9 @@ fn status_ok() -> HttpResponse {
 pub async fn gnam(MultipartForm(form): MultipartForm<UploadForm>) -> HttpResponse {
     let filename = form.file.file_name.unwrap();
     let path = format!("{}/{}", TMP_PATH, filename.clone());
-    info!("ingesting {filename}");
+    info!("Ingesting {filename}...");
+
+    let client = get_client().await;
 
     let err = form.file.file.persist(path.clone());
 
@@ -65,12 +68,28 @@ pub async fn gnam(MultipartForm(form): MultipartForm<UploadForm>) -> HttpRespons
         return internal_error();
     }
 
-    let data_pathfile = format!("{}/{}", DATA_PATH, filename);
-    info!("moving {filename} to data directory...");
-    let err = fs::rename(path, data_pathfile);
+    let body = ByteStream::from_path(Path::new(&path)).await;
 
-    if err.is_err() {
-        error!("{}", err.err().unwrap());
+    if body.is_err() {
+        error!("Creating body: {}", body.err().unwrap());
+        return internal_error();
+    }
+
+    let multipart_upload_res = client
+        .put_object()
+        .bucket("sources")
+        .key(filename)
+        .body(body.unwrap())
+        .send()
+        .await;
+
+    let _ = fs::remove_file(&path);
+
+    if multipart_upload_res.is_err() {
+        error!(
+            "Multipart uploading: {}",
+            multipart_upload_res.err().unwrap()
+        );
         return internal_error();
     }
 
