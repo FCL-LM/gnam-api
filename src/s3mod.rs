@@ -13,9 +13,10 @@ use crate::utils::get_env;
 
 pub async fn get_client() -> Client {
     let endpoint = get_env("S3_ENDPOINT");
-    let temp_config = aws_config::load_from_env().await;
+    let region = "us-east-1";
+    let temp_config = aws_config::from_env().region(region).load().await;
 
-    let config = s3::config::Builder::from(&temp_config).endpoint_url(endpoint);
+    let config = s3::config::Builder::from(&temp_config).endpoint_url(&endpoint);
     let client = s3::Client::from_conf(config.build());
 
     return client;
