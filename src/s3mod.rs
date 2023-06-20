@@ -1,4 +1,5 @@
 use std::process::exit;
+use dns_lookup::lookup_host;
 
 use aws_sdk_s3 as s3;
 use log::{error, info};
@@ -8,11 +9,18 @@ use s3::{
     types::{BucketLocationConstraint, CreateBucketConfiguration},
     Client,
 };
+use url::Url;
 
 use crate::utils::get_env;
 
 pub async fn get_client() -> Client {
     let endpoint = get_env("S3_ENDPOINT");
+
+    let url = Url::parse(&endpoint).unwrap();
+    let hostname = url.domain().unwrap();
+    let ip = lookup_host(hostname).unwrap()[0].to_string();
+    let endpoint = endpoint.replace(hostname, &ip);
+    
     let region = "us-east-1";
     let temp_config = aws_config::from_env().region(region).load().await;
 

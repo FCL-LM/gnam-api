@@ -12,7 +12,7 @@ mod utils;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    std::env::set_var("RUST_LOG", "info");
+    //std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
     create_source_bucket().await;

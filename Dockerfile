@@ -1,14 +1,13 @@
-FROM rust:1.70-alpine as builder
-
-RUN apk add musl-dev
+FROM rust:1.70-bookworm as builder
 
 WORKDIR /usr/src/gnam-api/
 COPY . .
 RUN cargo install --path .
 
-FROM alpine:latest
+FROM debian:bookworm
 
-RUN apk add curl
+RUN apt-get update && \
+    apt-get -y install curl
 
 COPY --from=builder /usr/local/cargo/bin/gnam-api /usr/local/bin/gnam-api
 
