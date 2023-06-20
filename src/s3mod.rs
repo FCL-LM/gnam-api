@@ -65,10 +65,11 @@ pub async fn bucket_exists(client: &Client, bucket_name: &str) -> bool {
 
     for bucket in buckets {
         if bucket.name().unwrap().eq(bucket_name) {
+            info!("Bucket {} exists", bucket_name);
             return true;
         }
     }
-
+    info!("Bucket {} does not exists", bucket_name);
     return false;
 }
 
