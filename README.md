@@ -40,7 +40,7 @@ date: Sat, 17 Jun 2023 20:46:46 GMT
 
 ### Ingest new data
 #### Request
-`GET /gnam`
+`POST /gnam`
 ```bash
 curl -i -F file=@./file http://localhost:9090/gnam
 ```
