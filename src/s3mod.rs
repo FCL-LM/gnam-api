@@ -1,5 +1,5 @@
-use std::process::exit;
 use dns_lookup::lookup_host;
+use std::process::exit;
 
 use aws_sdk_s3 as s3;
 use log::{error, info};
@@ -20,7 +20,7 @@ pub async fn get_client() -> Client {
     let hostname = url.domain().unwrap();
     let ip = lookup_host(hostname).unwrap()[0].to_string();
     let endpoint = endpoint.replace(hostname, &ip);
-    
+
     let region = "us-east-1";
     let temp_config = aws_config::from_env().region(region).load().await;
 
@@ -84,7 +84,7 @@ pub async fn create_source_bucket() {
         return;
     }
 
-    let s = create_bucket(&client, bucket_name, "").await;
+    let s = create_bucket(&client, bucket_name, "us-east-1").await;
 
     if s.is_err() {
         error!("Creating the document_sources bucket: {}", s.err().unwrap());
