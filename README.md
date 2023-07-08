@@ -1,4 +1,5 @@
 # gnam-api
+gnam-api is is the software component for ingesting documents and uploading them to SeaweedFS.
 
 ## Running with docker-compose
 
